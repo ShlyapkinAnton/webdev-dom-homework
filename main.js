@@ -1,43 +1,66 @@
-import { getComments, postComment } from "./api.js";
+import { getComments, postComment, loginComment, setToken, token} from "./api.js";
 import { renderComments } from "./renderComments.js";
 import { sanitizeHtml } from "./sanitizeHtml.js";
+import { login } from "./login.js";
 
 const buttonElement = document.getElementById('add-button');
-const nameInputElement = document.getElementById('name-input');
+export const nameInputElement = document.getElementById('name-input');
 const commentInputElement = document.getElementById('comment-input');
+const loginButton = document.getElementById('login-button');
+const authorizationElement = document.getElementById('authorization-input');
+
+
+document.getElementById('reg-form').style.display = 'none';
+document.getElementById('login-form').style.display = 'none';
+document.getElementById('add-form-disable').style.display = 'none';
+
+let comments = [];
+
+//переменная показывающая авторизован ли пользователь
+//export let isLogin = false
+
+//функция для измения статуса из других модулей
+//export const setIsLogin = (newValue) => {isLogin = newValue}
 
 // Получение списка комментариев из API завернутый в функцию GET запрос 
 function getCommentList(showLoading) {
   if (showLoading == true) {
     document.getElementById('comment-loading').style.display = 'flex'; 
+    document.getElementById('authorization-input').style.display = 'none';
   } else {
     document.getElementById('comment-loading').style.display = 'none';
   };
 
   getComments().then((responseData) => {
-    console.log(responseData);
     const appComments = responseData.comments.map((comment) => {
         return {
-            date: `${(new Date(comment.date).getDate().toString().padStart(2, "0")) + "." + (new Date(comment.date).getMonth() + 1).toString().padStart(2, "0") + "." + (new Date(comment.date).getFullYear() - 2000) + " " + (new Date(comment.date).getHours().toString().padStart(2, "0")) + ":" + (new Date(comment.date).getMinutes().toString().padStart(2, "0"))}`,
-            likes: comment.likes,
-            isLiked: false,
-            text: comment.text,
-            name: comment.author.name,
-            isEdit: false,
+          date: `${(new Date(comment.date).getDate().toString().padStart(2, "0")) + "." + (new Date(comment.date).getMonth() + 1).toString().padStart(2, "0") + "." + (new Date(comment.date).getFullYear() - 2000) + " " + (new Date(comment.date).getHours().toString().padStart(2, "0")) + ":" + (new Date(comment.date).getMinutes().toString().padStart(2, "0"))}`,
+          likes: comment.likes,
+          isLiked: false,
+          name: comment.author.name,
+          text: comment.text,
         };
     })
-    document.getElementById('comment-loading').style.display = 'none'; 
+    document.getElementById('comment-loading').style.display = 'none'; // Пожалуйста подождите, загружаю комментарии...
     comments = appComments;
     renderComments({ comments, checkInput, initEventListeners, initCommentingListeners, editCommentListeners });
+    return responseData;
     })
     .catch((error) => {
-        alert("Кажется что-то пошло не так, попробуйте позже");
-        console.warn(error);
+      alert("Кажется что-то пошло не так, попробуйте позже");
+      console.warn(error);
     })
 } 
+
 getCommentList(true); 
 
-let comments = [];
+document.getElementById('authorization-input').style.display = 'flex';
+authorizationElement.addEventListener("click", () => {
+  //console.log("authorizationElement");
+  document.getElementById('login-form').style.display = 'flex';
+  document.getElementById('authorization-input').style.display = 'none';
+  login();
+})
 
 // Проверка заполненности полей и отключение кнопки 
 const checkInput = () => {
@@ -157,48 +180,28 @@ const sendingComment = () => {
   function addComment() { 
     document.getElementById('comment-render').style.display = 'flex';
     document.getElementById('add-form-disable').style.display = 'none';
+    postComment( commentInputElement.value, nameInputElement.value, sanitizeHtml )
+    .then(() => {
+      return renderComments({ comments, checkInput, initEventListeners, initCommentingListeners, editCommentListeners })
+    }).then(() => {
+      document.getElementById('add-form-disable').style.display = 'flex';
+      document.getElementById('comment-render').style.display = 'none';
+      nameInputElement.value = "";
+      commentInputElement.value = "";
+    }).then(() => {
+      return getCommentList(false);
+    }).then(() => {
+      document.getElementById('add-form-disable').style.display = 'flex';
+      document.getElementById('comment-render').style.display = 'none';
+      nameInputElement.value = localStorage.getItem('name');
+      commentInputElement.value = "";
+    }).catch((error) => {
+      document.getElementById('add-form-disable').style.display = 'flex'; // Скрыть поле ввода
+      document.getElementById('comment-render').style.display = 'none'; // Комментарий добавляется..
+      console.warn(error);
+      console.log(error.message);     
+    });
 
-    postComment({
-        date: new Date(),
-        likes: 0,
-        isLiked: false,
-        text: sanitizeHtml(commentInputElement.value),
-        name: sanitizeHtml(nameInputElement.value),
-        isEdit: false,
-        forceError: false,
-    }).then((response) => {
-        if (response.status === 400) {
-          throw new Error('Имя и комментарий должен быть не короче 3х символов');
-        } else if (response.status === 500) {
-          throw new Error('Сервер сломался, попробуйте позже');
-        } else {
-          return response.json(); 
-        }    
-      })
-      .then(() => {
-        return getCommentList(false);
-      })
-      .then(() => {
-        document.getElementById('add-form-disable').style.display = 'flex';
-        document.getElementById('comment-render').style.display = 'none';
-        nameInputElement.value = "";
-        commentInputElement.value = "";
-      })
-      .catch((error) => {
-        document.getElementById('add-form-disable').style.display = 'flex'; // Скрыть поле ввода
-        document.getElementById('comment-render').style.display = 'none'; // Комментарий добавляется..
-        console.warn(error);
-        console.log(error.message);
-        if (error.message === "Имя и комментарий должен быть не короче 3х символов") {
-          alert('Имя и комментарий должен быть не короче 3х символов'); 
-        } else if (error.message === 'Сервер сломался, попробуйте позже') {
-          alert('Сервер сломался, попробуйте позже'); 
-        } else if (error.message === "Cannot read properties of undefined (reading 'json')") {
-          sendingComment();
-        } else {
-          alert("Кажется что-то пошло не так, попробуйте позже");
-        }         
-      });
     renderComments({ comments, checkInput, initEventListeners, initCommentingListeners, editCommentListeners });
   }
   addComment();
