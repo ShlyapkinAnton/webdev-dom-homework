@@ -34,6 +34,9 @@
     <div id="comment-render">
       <p>Комментарий добавляется...</p>
     </div>
+    <div id="authorization-input">
+      <p>Что бы добавить комментарий, <span>авторизируйтесь</span></p>
+    </div>
     <div class="add-form" id="add-form-disable">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name-input" value="" />
       <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4" id="comment-input"
@@ -42,7 +45,28 @@
         <button id="add-button" class="add-form-button add-form-button_disable">Написать</button>
       </div>
     </div>
+    <div class="login-form" id="login-form">
+      <h3>Форма ввода</h3>
+      <input id="login-input" class="login-form-input" type="text" placeholder="Введите логин" value=""/>
+      <input id="password-input" class="login-form-input" type="text" placeholder="Введите пароль" value=""/>  
+      <div class="add-form-row">
+        <button id="login-button" class="add-form-button">Войти </button>    
+      </div>
+      <a class="login-form-link" href="">Зарегистрироваться </a>
+    </div>
+    <div id="reg-form" class="login-form reg-form">
+      <h3>Форма регистрации</h3>
+      <input id="name-input" class="login-form-input" type="text" placeholder="Введите имя" value=""/>
+      <input id="login-input" class="login-form-input" type="text" placeholder="Введите логин" value=""/>
+      <input id="password-input" class="login-form-input" type="text" placeholder="Введите пароль" value=""/>  
+      <div class="add-form-row">
+        <button id="reg-button" class="add-form-button">Зарегистрироваться</button>    
+      </div>
+      <a class="login-form-link" href="">Войти</a>
+    </div>
+    </div>
   </div>
 </body>
 <script type="module" src="./main.js"></script>
+<!-- <script src="./login.js"></script>  -->
 </html>
