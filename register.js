@@ -1,4 +1,4 @@
-import { register } from "./api.js";
+import { registration } from "./api.js";
 
 export function register() {
     const regButton = document.getElementById('reg-button');
@@ -8,7 +8,7 @@ export function register() {
 
     regButton.addEventListener("click", () => {
         console.log('reg');
-        register({
+        registration({
             login: loginInputElement.value,
             name: nameInputElement.value,
             password: passwordInputElement.value,

@@ -2,13 +2,13 @@ import { getComments, postComment, loginComment, setToken, token} from "./api.js
 import { renderComments } from "./renderComments.js";
 import { sanitizeHtml } from "./sanitizeHtml.js";
 import { login } from "./login.js";
+import { format } from "date-fns";
 
 const buttonElement = document.getElementById('add-button');
 export const nameInputElement = document.getElementById('name-input');
 const commentInputElement = document.getElementById('comment-input');
 const loginButton = document.getElementById('login-button');
 const authorizationElement = document.getElementById('authorization-input');
-
 
 document.getElementById('reg-form').style.display = 'none';
 document.getElementById('login-form').style.display = 'none';
@@ -34,7 +34,7 @@ function getCommentList(showLoading) {
   getComments().then((responseData) => {
     const appComments = responseData.comments.map((comment) => {
         return {
-          date: `${(new Date(comment.date).getDate().toString().padStart(2, "0")) + "." + (new Date(comment.date).getMonth() + 1).toString().padStart(2, "0") + "." + (new Date(comment.date).getFullYear() - 2000) + " " + (new Date(comment.date).getHours().toString().padStart(2, "0")) + ":" + (new Date(comment.date).getMinutes().toString().padStart(2, "0"))}`,
+          date: format((new Date(comment.date)), "yyyy-MM-dd hh.mm.ss"),
           likes: comment.likes,
           isLiked: false,
           name: comment.author.name,
