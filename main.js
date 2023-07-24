@@ -34,7 +34,7 @@ function getCommentList(showLoading) {
   getComments().then((responseData) => {
     const appComments = responseData.comments.map((comment) => {
         return {
-          date: format((new Date(comment.date)), "yyyy-mm-dd hh.mm.ss"),
+          date: format((new Date(comment.date)), "yyyy-MM-dd hh.mm.ss"),
           likes: comment.likes,
           isLiked: false,
           name: comment.author.name,
