@@ -72,12 +72,12 @@ export function loginComment(login, password) {
 }
 
 //Регистрация
-export function registration(login, password, userName) {
+export function regComment(login, password, name) {
   return fetch(regURL, {
     method: "POST",
     body : JSON.stringify({
       login: login,
-      name: userName,
+      name: name,
       password: password,
     })
   })
